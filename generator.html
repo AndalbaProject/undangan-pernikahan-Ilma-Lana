@@ -424,6 +424,50 @@
             </div>
           </div>
 
+          <!-- Versi 3: Minggu 24 Jan -->
+          <div class="session-card" data-session="3">
+            <input type="radio" name="session" value="3">
+            <div class="session-badge">Versi 3 (Minggu)</div>
+            <div class="session-day">Minggu, 24 Januari 2027</div>
+            <div class="session-time">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Sesi 2: Pukul 11.00 – 13.00 WIB
+            </div>
+          </div>
+
+          <!-- Versi 4: Minggu 24 Jan -->
+          <div class="session-card" data-session="4">
+            <input type="radio" name="session" value="4">
+            <div class="session-badge">Versi 4 (Minggu)</div>
+            <div class="session-day">Minggu, 24 Januari 2027</div>
+            <div class="session-time">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Sesi 3: Pukul 13.00 – 15.00 WIB
+            </div>
+          </div>
+
+          <!-- Versi 5: Minggu 24 Jan -->
+          <div class="session-card" data-session="5">
+            <input type="radio" name="session" value="5">
+            <div class="session-badge">Versi 5 (Minggu)</div>
+            <div class="session-day">Minggu, 24 Januari 2027</div>
+            <div class="session-time">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Sesi 4: Pukul 15.00 – 17.00 WIB
+            </div>
+          </div>
+
+          <!-- Versi 6: Minggu 24 Jan -->
+          <div class="session-card" data-session="6">
+            <input type="radio" name="session" value="6">
+            <div class="session-badge">Versi 6 (Minggu)</div>
+            <div class="session-day">Minggu, 24 Januari 2027</div>
+            <div class="session-time">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Sesi 5: Pukul 18.00 – Selesai
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -535,8 +579,8 @@
           params.set("to", rawName);
         }
 
-        if (currentSession === "2") {
-          params.set("sesi", "2");
+        if (currentSession !== "1") {
+          params.set("sesi", currentSession);
         }
 
         const queryString = params.toString();
@@ -548,11 +592,15 @@
         elBtnOpenLink.href = url;
 
         // Update badge
-        if (currentSession === "2") {
-          elBadgeCurrentSession.textContent = "Versi 2 (Minggu, 24 Jan - Sesi 1)";
-        } else {
-          elBadgeCurrentSession.textContent = "Versi 1 (Sabtu, 23 Jan)";
-        }
+        const sessionLabels = {
+          "1": "Versi 1 (Sabtu, 23 Jan)",
+          "2": "Versi 2 (Minggu, 24 Jan - Sesi 1)",
+          "3": "Versi 3 (Minggu, 24 Jan - Sesi 2)",
+          "4": "Versi 4 (Minggu, 24 Jan - Sesi 3)",
+          "5": "Versi 5 (Minggu, 24 Jan - Sesi 4)",
+          "6": "Versi 6 (Minggu, 24 Jan - Sesi 5)"
+        };
+        elBadgeCurrentSession.textContent = sessionLabels[currentSession] || sessionLabels["1"];
 
         // 2. Generate WhatsApp Message Template
         const nameWithPartner = /partner/i.test(rawName) ? guestName : guestName + " & Partner";
@@ -561,12 +609,30 @@
         let dateLine = "";
         let timeLine = "";
 
-        if (currentSession === "2") {
-          dateLine = "Minggu, 24 Januari 2027";
-          timeLine = "Pukul 09.00 - 11.00 WIB";
-        } else {
-          dateLine = "Sabtu, 23 Januari 2027";
-          timeLine = "Pukul 09.00 WIB - Selesai";
+        switch (currentSession) {
+          case "2":
+            dateLine = "Minggu, 24 Januari 2027";
+            timeLine = "Sesi 1 : 09.00 - 11.00 WIB";
+            break;
+          case "3":
+            dateLine = "Minggu, 24 Januari 2027";
+            timeLine = "Sesi 2 : 11.00 - 13.00 WIB";
+            break;
+          case "4":
+            dateLine = "Minggu, 24 Januari 2027";
+            timeLine = "Sesi 3 : 13.00 - 15.00 WIB";
+            break;
+          case "5":
+            dateLine = "Minggu, 24 Januari 2027";
+            timeLine = "Sesi 4 : 15.00 - 17.00 WIB";
+            break;
+          case "6":
+            dateLine = "Minggu, 24 Januari 2027";
+            timeLine = "Sesi 5 : 18.00 - Selesai";
+            break;
+          default:
+            dateLine = "Sabtu, 23 Januari 2027";
+            timeLine = "Pukul 09.00 WIB - Selesai";
         }
 
         const message =
