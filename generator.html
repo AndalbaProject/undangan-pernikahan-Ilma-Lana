@@ -520,6 +520,29 @@
 
       </div>
 
+      <!-- Bulk Generator -->
+      <div class="output-box" style="margin-top:20px;">
+        <div class="output-label">
+          <span>Generate Banyak Sekaligus</span>
+          <span id="bulkSessionBadge" style="color:var(--gold-dark);font-size:11px;">Versi 1 (Sabtu, 23 Jan)</span>
+        </div>
+        <p style="font-size:12px;color:var(--text-muted);margin:0 0 10px;line-height:1.6;">
+          Tulis satu nama per baris. Bisa disertai nomor WA dengan format <b>Nama|08123456789</b> — nomor opsional, yang tanpa nomor tetap terbuat link-nya.
+        </p>
+        <textarea id="bulkNames" class="textarea-wa" style="height:140px;" placeholder="Contoh:&#10;Bapak H. Distam &amp; Keluarga|08123456789&#10;Ibu Ani&#10;Sahabat Rara|628987654321&#10;Rekan Kantor"></textarea>
+        <div class="btn-group" style="margin-bottom:12px;">
+          <button type="button" class="btn btn-primary" id="btnBulkGenerate">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            Generate Semua
+          </button>
+          <button type="button" class="btn btn-outline" id="btnBulkCopy">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Salin Semua Hasil
+          </button>
+        </div>
+        <textarea id="bulkResult" class="textarea-wa" style="height:300px;" readonly placeholder="Hasil generate akan muncul di sini..."></textarea>
+      </div>
+
     </div>
   </div>
 
@@ -542,6 +565,11 @@
       const elBtnOpenLink = document.getElementById("btnOpenLink");
       const elBtnSendWa = document.getElementById("btnSendWa");
       const elBadgeCurrentSession = document.getElementById("badgeCurrentSession");
+      const elBulkSessionBadge = document.getElementById("bulkSessionBadge");
+      const elBulkNames = document.getElementById("bulkNames");
+      const elBulkResult = document.getElementById("bulkResult");
+      const elBtnBulkGenerate = document.getElementById("btnBulkGenerate");
+      const elBtnBulkCopy = document.getElementById("btnBulkCopy");
       const elToast = document.getElementById("toast");
 
       let currentSession = "1";
@@ -557,6 +585,7 @@
           card.querySelector("input").checked = true;
           currentSession = card.getAttribute("data-session");
           updatePreview();
+          updateBulkBadge();
         });
       });
 
@@ -570,23 +599,10 @@
         const guestName = rawName || "Nama Tamu";
         const salutation = elSalutation.value;
         const phone = formatPhone(elGuestPhone.value.trim());
+        const info = getSessionInfo();
 
         // 1. Generate Link URL
-        let url = BASE_URL;
-        const params = new URLSearchParams();
-
-        if (rawName) {
-          params.set("to", rawName);
-        }
-
-        if (currentSession !== "1") {
-          params.set("sesi", currentSession);
-        }
-
-        const queryString = params.toString();
-        if (queryString) {
-          url += "?" + queryString;
-        }
+        const url = buildGuestUrl(rawName, info.sesi);
 
         elGeneratedUrl.textContent = url;
         elBtnOpenLink.href = url;
@@ -606,35 +622,6 @@
         const nameWithPartner = /partner/i.test(rawName) ? guestName : guestName + " & Partner";
         const greetingLine = salutation || "Bapak/Ibu/Saudara/i";
 
-        let dateLine = "";
-        let timeLine = "";
-
-        switch (currentSession) {
-          case "2":
-            dateLine = "Minggu, 24 Januari 2027";
-            timeLine = "Sesi 1 : 09.00 - 11.00 WIB";
-            break;
-          case "3":
-            dateLine = "Minggu, 24 Januari 2027";
-            timeLine = "Sesi 2 : 11.00 - 13.00 WIB";
-            break;
-          case "4":
-            dateLine = "Minggu, 24 Januari 2027";
-            timeLine = "Sesi 3 : 13.00 - 15.00 WIB";
-            break;
-          case "5":
-            dateLine = "Minggu, 24 Januari 2027";
-            timeLine = "Sesi 4 : 15.00 - 17.00 WIB";
-            break;
-          case "6":
-            dateLine = "Minggu, 24 Januari 2027";
-            timeLine = "Sesi 5 : 18.00 - Selesai";
-            break;
-          default:
-            dateLine = "Sabtu, 23 Januari 2027";
-            timeLine = "Pukul 09.00 WIB - Selesai";
-        }
-
         const message =
 `Kepada Yth.
 ${greetingLine}
@@ -644,8 +631,8 @@ di tempat
 Tanpa mengurangi rasa hormat, perkenankan kami mengundang Bapak/Ibu/Saudara/i, untuk menghadiri acara Resepsi Pernikahan Kami
 
 Yang Insya'Allah akan diselenggarakan pada :
-${dateLine}
-${timeLine}
+${info.dateLine}
+${info.timeLine}
 Alamat : KBIHU AL-KAUTSAR JOMBANG
 (Dsn. Dempok, Rt.01/Rw.01, Ds. Grogol, Kec. Diwek, Kab. Jombang)
 
@@ -667,6 +654,116 @@ Lana & Ilma`;
           elBtnSendWa.href = `https://api.whatsapp.com/send?text=${waEncoded}`;
         }
       }
+
+      function updateBulkBadge() {
+        const sessionLabels = {
+          "1": "Versi 1 (Sabtu, 23 Jan)",
+          "2": "Versi 2 (Minggu, 24 Jan - Sesi 1)",
+          "3": "Versi 3 (Minggu, 24 Jan - Sesi 2)",
+          "4": "Versi 4 (Minggu, 24 Jan - Sesi 3)",
+          "5": "Versi 5 (Minggu, 24 Jan - Sesi 4)",
+          "6": "Versi 6 (Minggu, 24 Jan - Sesi 5)"
+        };
+        if (elBulkSessionBadge) {
+          elBulkSessionBadge.textContent = sessionLabels[currentSession] || sessionLabels["1"];
+        }
+      }
+
+      // Data sesi bersama untuk single & bulk
+      function getSessionInfo() {
+        const map = {
+          "1": { dateLine: "Sabtu, 23 Januari 2027", timeLine: "Pukul 09.00 WIB - Selesai", sesi: "1" },
+          "2": { dateLine: "Minggu, 24 Januari 2027", timeLine: "Sesi 1 : 09.00 - 11.00 WIB", sesi: "2" },
+          "3": { dateLine: "Minggu, 24 Januari 2027", timeLine: "Sesi 2 : 11.00 - 13.00 WIB", sesi: "3" },
+          "4": { dateLine: "Minggu, 24 Januari 2027", timeLine: "Sesi 3 : 13.00 - 15.00 WIB", sesi: "4" },
+          "5": { dateLine: "Minggu, 24 Januari 2027", timeLine: "Sesi 4 : 15.00 - 17.00 WIB", sesi: "5" },
+          "6": { dateLine: "Minggu, 24 Januari 2027", timeLine: "Sesi 5 : 18.00 - Selesai", sesi: "6" }
+        };
+        return map[currentSession] || map["1"];
+      }
+
+      function buildGuestUrl(name, sesi) {
+        let url = BASE_URL;
+        const params = new URLSearchParams();
+        if (name) {
+          params.set("to", name);
+        }
+        if (sesi !== "1") {
+          params.set("sesi", sesi);
+        }
+        const queryString = params.toString();
+        if (queryString) {
+          url += "?" + queryString;
+        }
+        return url;
+      }
+
+      function buildWaMessage(name, salutation, url, info) {
+        const nameWithPartner = /partner/i.test(name) ? name : name + " & Partner";
+        const greetingLine = salutation || "Bapak/Ibu/Saudara/i";
+        return `Kepada Yth.
+${greetingLine}
+${nameWithPartner}
+di tempat
+
+Tanpa mengurangi rasa hormat, perkenankan kami mengundang Bapak/Ibu/Saudara/i, untuk menghadiri acara Resepsi Pernikahan Kami
+
+Yang Insya'Allah akan diselenggarakan pada :
+${info.dateLine}
+${info.timeLine}
+Alamat : KBIHU AL-KAUTSAR JOMBANG
+(Dsn. Dempok, Rt.01/Rw.01, Ds. Grogol, Kec. Diwek, Kab. Jombang)
+
+Info lebih lengkap klik link dibawah ini
+${url}
+
+Merupakan suatu kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan untuk hadir dan memberikan doa restu.
+
+Kami yang berbahagia,
+Lana & Ilma`;
+      }
+
+      // Bulk Generate
+      elBtnBulkGenerate.addEventListener("click", function() {
+        const lines = elBulkNames.value.split("\n").map(function(l) { return l.trim(); }).filter(Boolean);
+        if (!lines.length) {
+          showToast("Isi dulu daftar nama tamunya!");
+          elBulkNames.focus();
+          return;
+        }
+        const info = getSessionInfo();
+        const chunks = [];
+        lines.forEach(function(line, i) {
+          const parts = line.split("|");
+          const name = (parts[0] || "").trim();
+          const phone = formatPhone((parts[1] || "").trim());
+          if (!name) return;
+          const url = buildGuestUrl(name, info.sesi);
+          const wa = buildWaMessage(name, elSalutation.value, url, info);
+          let block = (i + 1) + ". " + name + "\nLink : " + url;
+          if (phone) {
+            block += "\nWA : https://wa.me/" + phone;
+          }
+          block += "\n\nPesan WA :\n" + wa;
+          chunks.push(block);
+        });
+        if (!chunks.length) {
+          showToast("Tidak ada nama valid yang bisa diproses!");
+          return;
+        }
+        const divider = "\n\n----------------------------------------\n\n";
+        elBulkResult.value = chunks.join(divider);
+        showToast(chunks.length + " tamu berhasil di-generate!");
+      });
+
+      // Bulk Copy All
+      elBtnBulkCopy.addEventListener("click", function() {
+        if (!elBulkResult.value) {
+          showToast("Belum ada hasil — klik Generate Semua dulu!");
+          return;
+        }
+        copyToClipboard(elBulkResult.value, "Semua hasil berhasil disalin!");
+      });
 
       function formatPhone(phone) {
         if (!phone) return "";
