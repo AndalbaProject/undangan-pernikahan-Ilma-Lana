@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 50" width="160" height="50">
+  <defs>
+    <linearGradient id="mandiriGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDB813"/>
+      <stop offset="100%" stop-color="#EAA000"/>
+    </linearGradient>
+  </defs>
+  <text x="5" y="36" font-family="'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="34" font-weight="800" fill="#003D79" letter-spacing="-0.5">mandırı</text>
+  <path d="M125,22 C135,10 148,8 158,12 C150,18 140,24 130,26 Z" fill="url(#mandiriGold)" />
+  <path d="M132,15 C142,4 153,3 160,6 C152,11 144,16 136,19 Z" fill="#F8A51D" />
+</svg>
+
