@@ -217,10 +217,13 @@
 }
 .elementor-32125 .elementor-element.elementor-element-5f1e6dbb {
   margin-top: 185px;
-  padding-bottom: 6px;
+  padding-bottom: 0px;
 }
 .elementor-32125 .elementor-element.elementor-element-1772805f {
-  margin-top: 12px;
+  margin-top: 0px;
+}
+.elementor-32125 .elementor-element.elementor-element-1772805f > .elementor-widget-container {
+  padding-top: 2px;
 }
 .elementor-32125 .elementor-element.elementor-element-6c8bdb8a {
   --spacer-size: 15px;
