@@ -8,7 +8,7 @@
   // =========================================================================
   // URL WEB APP GOOGLE APPS SCRIPT:
   // =========================================================================
-  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbymmCahki0VXTkwDYvlId-T9R9VXUMpfW1hrWnEzv7E3NtbC8ylOvtyFUuThSpDRMU/exec"; 
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHvg_ZNk6CSNRlUE2ldJr1z7GJbGlr8lnIfMzYPD48vmQCZCFq-4DHMHiXiPPrkvI/exec"; 
   const CACHE_KEY = "andalba_rsvp_cache_ilma_lana";
 
   function initRSVP() {
