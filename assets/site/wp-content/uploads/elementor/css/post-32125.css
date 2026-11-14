@@ -211,4 +211,7 @@
   pointer-events: none;
 }/* End custom CSS */
 /* Start custom CSS: turunkan tanggal & tombol cover agar tidak menutupi background */
-.elementor-32125 .elementor-element.elementor-element-5f1e6dbb{margin-top:170px;}/* End custom CSS */
+.elementor-32125 .elementor-element.elementor-element-5f1e6dbb{margin-top:170px;}
+/* Start custom CSS: turunkan judul cover (The Wedding of / Lana & Ilma) */
+.elementor-32125 .elementor-element.elementor-element-3ee90b5c,
+.elementor-32125 .elementor-element.elementor-element-73a24321{transform:translateY(30px);}/* End custom CSS *//* End custom CSS */
