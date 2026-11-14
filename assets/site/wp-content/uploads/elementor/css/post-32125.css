@@ -212,6 +212,8 @@
 }/* End custom CSS */
 /* Start custom CSS: turunkan tanggal & tombol cover agar tidak menutupi background */
 .elementor-32125 .elementor-element.elementor-element-5f1e6dbb{margin-top:10px;}
+/* Jarak tanggal dari tombol Save The Date */
+.elementor-32125 .elementor-element.elementor-element-1772805f{margin-top:60px;}
 /* Start custom CSS: turunkan judul cover (The Wedding of / Lana & Ilma) */
 .elementor-32125 .elementor-element.elementor-element-3ee90b5c,
 .elementor-32125 .elementor-element.elementor-element-73a24321{transform:translateY(30px);}/* End custom CSS *//* End custom CSS */
