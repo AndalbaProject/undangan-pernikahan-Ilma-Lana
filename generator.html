@@ -555,49 +555,41 @@
         }
 
         // 2. Generate WhatsApp Message Template
-        const greetingTarget = salutation ? (salutation + " " + guestName) : guestName;
+        const nameWithPartner = /partner/i.test(rawName) ? guestName : guestName + " & Partner";
+        const greetingLine = salutation || "Bapak/Ibu/Saudara/i";
 
         let dateLine = "";
         let timeLine = "";
 
         if (currentSession === "2") {
-          dateLine = "Hari/Tgl: Minggu, 24 Januari 2027";
-          timeLine = "Waktu: Sesi 1 (Pukul 09.00 - 11.00 WIB)";
+          dateLine = "Minggu, 24 Januari 2027";
+          timeLine = "Pukul 09.00 - 11.00 WIB";
         } else {
-          dateLine = "Hari/Tgl: Sabtu, 23 Januari 2027";
-          timeLine = "Waktu: Pukul 09.00 WIB - Selesai";
+          dateLine = "Sabtu, 23 Januari 2027";
+          timeLine = "Pukul 09.00 WIB - Selesai";
         }
 
-        const message = 
+        const message =
 `Kepada Yth.
-${greetingTarget}
+${greetingLine}
+${nameWithPartner}
+di tempat
 
-Assalamu'alaikum Warahmatullahi Wabarakatuh
+Tanpa mengurangi rasa hormat, perkenankan kami mengundang Bapak/Ibu/Saudara/i, untuk menghadiri acara Resepsi Pernikahan Kami
 
-Tanpa mengurangi rasa hormat, perkenankan kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara pernikahan kami:
-
-💍 The Wedding of Ilma & Lana 💍
-Ilma Aulia Sabarita, S.E.
-& H. Muhammad Lana Syifaun Niams, S.E.
-
-💒 DETAIL RESEPSI:
-📅 ${dateLine}
-⏰ ${timeLine}
-📍 Tempat: KBIHU AL-KAUTSAR JOMBANG
+Yang Insya'Allah akan diselenggarakan pada :
+${dateLine}
+${timeLine}
+Alamat : KBIHU AL-KAUTSAR JOMBANG
 (Dsn. Dempok, Rt.01/Rw.01, Ds. Grogol, Kec. Diwek, Kab. Jombang)
 
-Berikut link undangan digital kami untuk informasi lengkap acara dan konfirmasi kehadiran:
-👉 ${url}
+Info lebih lengkap klik link dibawah ini
+${url}
 
-Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir serta memberikan doa restu kepada kami.
-
-Terima kasih atas perhatian dan doa restunya.
-
-Wassalamu'alaikum Warahmatullahi Wabarakatuh
+Merupakan suatu kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan untuk hadir dan memberikan doa restu.
 
 Kami yang berbahagia,
-Ilma & Lana
-Beserta Keluarga Besar`;
+Lana & Ilma`;
 
         elWaMessageText.value = message;
 
