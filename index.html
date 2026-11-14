@@ -1408,7 +1408,7 @@ KBIHU AL-Kautsar Jombang								</div>
          data-rotatespeed="12"
          style="display:flex; align-items:center; gap:10px;"
     >
-      <audio id="idb-audio-5bbb67eb" class="idb-audio-el" preload="metadata" playsinline>
+      <audio id="idb-audio-5bbb67eb" class="idb-audio-el" preload="auto" playsinline webkit-playsinline="true">
         <source src="song.mp3" type="audio/mpeg">
       </audio>
 
@@ -1841,64 +1841,140 @@ function initReveal(){
   });
 }
 
-function getAudio(){
-  return document.querySelector('.idb-audio-box .idb-audio-el')
-      || document.getElementById('song');
-}
-
-function getPlayBtn(){
-  return document.querySelector('.idb-audio-box .idb-mute-sound');
-}
-
-function playMusic(){
-  window.__BISDEV_MUSIC_ALLOWED = true;
-
-  const btn = getPlayBtn();
-  if(btn){ btn.click(); return; }
-
-  const audio = getAudio();
-  if(audio) audio.play().catch(()=>{});
-}
-
-function pauseMusic(){
-  const a = getAudio();
-  if(!a) return;
-  wasPlayingBeforeHide = !a.paused;
-  a.pause();
-}
-
-function resumeMusic(){
-  if(!wasPlayingBeforeHide) return;
-
-  window.__BISDEV_MUSIC_ALLOWED = true;
-  const a = getAudio();
-  if(!a) return;
-
-  a.play().catch(()=>{
-    const btn = getPlayBtn();
-    if(btn){
-      btn.classList.add('idb-attention');
-      setTimeout(()=>btn.classList.remove('idb-attention'),2500);
-    }
-  });
-}
-
-function bindOpenButton(){
-  const btn = document.getElementById('open');
-  if(!btn) return;
-
-  btn.addEventListener('click',()=>{
-    unlockSection();
-    showAw();
-    playMusic();
-  },{ once:true });
-}
-
-document.addEventListener('visibilitychange',()=>{
-  document.hidden ? pauseMusic() : setTimeout(resumeMusic,200);
-});
-
-window.addEventListener('blur', pauseMusic);
+function getAudio(){
+  return document.querySelector('.idb-audio-box .idb-audio-el')
+      || document.getElementById('song');
+}
+
+function getPlayBtn(){
+  return document.querySelector('.idb-audio-box .idb-mute-sound');
+}
+
+function playMusic(){
+  window.__BISDEV_MUSIC_ALLOWED = true;
+
+  const audio = getAudio();
+  if(!audio) return;
+
+  audio.muted = false;
+
+  // Langsung panggil audio.play() dalam user gesture asli (Safari memblokir btn.click() buatan)
+  try {
+    const playPromise = audio.play();
+    if(playPromise !== undefined){
+      playPromise.then(function(){
+        // Audio berhasil memutar, piringan musik akan otomatis berputar
+      }).catch(function(err){
+        console.warn("[iOS Audio] Direct play rejected, fallback to button:", err);
+        const btn = getPlayBtn();
+        if(btn) btn.click();
+      });
+    }
+  } catch(e) {
+    console.warn("[iOS Audio] playMusic error:", e);
+    const btn = getPlayBtn();
+    if(btn) btn.click();
+  }
+}
+
+function pauseMusic(){
+  const a = getAudio();
+  if(!a) return;
+  wasPlayingBeforeHide = !a.paused;
+  a.pause();
+}
+
+function resumeMusic(){
+  if(!wasPlayingBeforeHide) return;
+
+  window.__BISDEV_MUSIC_ALLOWED = true;
+  const a = getAudio();
+  if(!a) return;
+
+  a.muted = false;
+  a.play().catch(()=>{
+    const btn = getPlayBtn();
+    if(btn){
+      btn.classList.add('idb-attention');
+      setTimeout(()=>btn.classList.remove('idb-attention'),2500);
+    }
+  });
+}
+
+function registerIosAudioUnlock(){
+  const audio = getAudio();
+  if(!audio) return;
+
+  function tryUnlock(){
+    if(window.__BISDEV_MUSIC_ALLOWED && audio.paused){
+      audio.muted = false;
+      audio.play().then(function(){
+        cleanupUnlock();
+      }).catch(function(){});
+    } else if(!audio.paused){
+      cleanupUnlock();
+    }
+  }
+
+  function cleanupUnlock(){
+    document.removeEventListener('touchstart', tryUnlock);
+    document.removeEventListener('touchend', tryUnlock);
+    document.removeEventListener('click', tryUnlock);
+  }
+
+  document.addEventListener('touchstart', tryUnlock, { passive: true });
+  document.addEventListener('touchend', tryUnlock, { passive: true });
+  document.addEventListener('click', tryUnlock, { passive: true });
+}
+
+function bindOpenButton(){
+  const btn = document.getElementById('open');
+  if(!btn) return;
+
+  let hasTriggered = false;
+  function handleOpenClick(e){
+    if(hasTriggered) return;
+    hasTriggered = true;
+
+    // 1. Resume Web Audio API context untuk iOS Safari
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        if (!window.__iosAudioCtx) {
+          window.__iosAudioCtx = new AudioCtx();
+        }
+        if (window.__iosAudioCtx.state === 'suspended') {
+          window.__iosAudioCtx.resume();
+        }
+      }
+    } catch(err) {}
+
+    // 2. Langsung putar musik saat gesture aktif
+    playMusic();
+
+    // 3. Buka section sampul
+    unlockSection();
+    showAw();
+
+    // 4. Pasang listener fallback untuk antisipasi jika koneksi seluler lambat saat buffer mp3
+    registerIosAudioUnlock();
+  }
+
+  btn.addEventListener('click', handleOpenClick);
+  btn.addEventListener('touchend', handleOpenClick);
+
+  const innerBtn = btn.querySelector('.elementor-button');
+  if(innerBtn){
+    innerBtn.addEventListener('click', handleOpenClick);
+    innerBtn.addEventListener('touchend', handleOpenClick);
+  }
+}
+
+document.addEventListener('visibilitychange',()=>{
+  document.hidden ? pauseMusic() : setTimeout(resumeMusic,200);
+});
+
+window.addEventListener('blur', pauseMusic);
 window.addEventListener('focus', ()=>setTimeout(resumeMusic,200));
 
 })();
@@ -2015,12 +2091,14 @@ const wdpAudio = document.querySelector('.idb-audio-box .idb-audio-el')
   || document.getElementById('song')
   || false;
 
-document.addEventListener('visibilitychange', event => {
-  if (document.visibilityState === 'visible') {
-    wdpAudio && wdpAudio.play();
-  } else {
-    wdpAudio && wdpAudio.pause();
-  }
+document.addEventListener('visibilitychange', event => {
+  if (document.visibilityState === 'visible') {
+    if (window.__BISDEV_MUSIC_ALLOWED && wdpAudio && wdpAudio.paused) {
+      wdpAudio.play().catch(function() {});
+    }
+  } else {
+    wdpAudio && !wdpAudio.paused && wdpAudio.pause();
+  }
 });
 </script>
 <style>/* =========================================
