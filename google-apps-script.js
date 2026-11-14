@@ -49,11 +49,12 @@ function doPost(e) {
     const nama = (data.nama || data.name || "Tamu Undangan").toString().trim();
     const kehadiran = (data.kehadiran || data.presence || "Hadir").toString().trim();
     const ucapan = (data.ucapan || data.pesan || data.message || "-").toString().trim();
+    const sesi = (data.sesi || data.session || "Sabtu, 23 Jan 2027").toString().trim();
     
     // Format timestamp otomatis waktu Indonesia Barat (WIB)
     const timestamp = Utilities.formatDate(new Date(), "Asia/Jakarta", "dd/MM/yyyy HH:mm");
 
-    sheet.appendRow([timestamp, nama, kehadiran, ucapan]);
+    sheet.appendRow([timestamp, nama, kehadiran, ucapan, sesi]);
 
     const resObj = {
       status: "success",

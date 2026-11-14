@@ -105,9 +105,17 @@
         sendBtn.disabled = true;
         sendBtn.textContent = "Mengirim...";
 
+        const urlParams = new URLSearchParams(window.location.search);
+        const sesiP = (urlParams.get("sesi") || urlParams.get("session") || "").toLowerCase();
+        const tglP = (urlParams.get("tgl") || urlParams.get("tanggal") || "").toLowerCase();
+        const hariP = (urlParams.get("hari") || "").toLowerCase();
+        const isSesi2 = (sesiP === "2" || tglP === "24" || hariP === "minggu");
+        const sesiLabel = isSesi2 ? "Minggu, 24 Jan 2027 (Sesi 1)" : "Sabtu, 23 Jan 2027";
+
         const payload = new URLSearchParams({
           nama: nama,
           kehadiran: selectedPresence,
+          sesi: sesiLabel,
           ucapan: ucapan
         });
 

@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Generator Link Undangan - Ilma &amp; Lana</title>
+  <link rel="icon" href="preview-wedding.jpg" sizes="192x192">
+  <link rel="apple-touch-icon" href="preview-wedding.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #244235;
+      --primary-light: #325847;
+      --primary-soft: #eaf1ed;
+      --gold: #c5a059;
+      --gold-dark: #9e7935;
+      --gold-soft: #fbf7ee;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --bg-page: #f4f6f4;
+      --card-bg: #ffffff;
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(0,0,0,0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.5;
+      min-height: 100vh;
+      padding: 24px 16px 60px;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+      padding: 24px 20px;
+      background: linear-gradient(135deg, var(--primary) 0%, #173025 100%);
+      color: #fff;
+      border-radius: var(--radius);
+      box-shadow: 0 12px 28px rgba(36,66,53,0.22);
+      border: 1px solid rgba(197,160,89,0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(197,160,89,0.25) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .header-sub {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .header-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #ffffff;
+    }
+
+    .header-desc {
+      font-size: 13px;
+      color: #d1ded6;
+      max-width: 440px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .form-label span.req {
+      color: #ef4444;
+      margin-left: 4px;
+    }
+
+    .input-text {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-family: inherit;
+      border: 1.5px solid #d1d5db;
+      border-radius: 12px;
+      outline: none;
+      transition: all 0.2s ease;
+      background: #fafafa;
+    }
+
+    .input-text:focus {
+      border-color: var(--primary);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(36,66,53,0.1);
+    }
+
+    /* Versi Acara Picker */
+    .session-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 520px) {
+      .session-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .session-card {
+      border: 2px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 14px 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .session-card:hover {
+      border-color: #cbd5e1;
+    }
+
+    .session-card.active {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+    }
+
+    .session-card input[type="radio"] {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      accent-color: var(--primary);
+      width: 18px;
+      height: 18px;
+    }
+
+    .session-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: #e2e8f0;
+      color: #334155;
+      margin-bottom: 8px;
+      align-self: flex-start;
+    }
+
+    .session-card.active .session-badge {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .session-day {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 2px;
+    }
+
+    .session-time {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Output Section */
+    .output-box {
+      background: #f8faf9;
+      border: 1px solid #d9e4de;
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 20px;
+    }
+
+    .output-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .link-display {
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-family: monospace;
+      font-size: 13px;
+      color: #1f2937;
+      word-break: break-all;
+      margin-bottom: 12px;
+    }
+
+    .textarea-wa {
+      width: 100%;
+      height: 160px;
+      padding: 12px 14px;
+      font-size: 12.5px;
+      font-family: inherit;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      background: #fff;
+      resize: vertical;
+      line-height: 1.5;
+      color: #374151;
+      margin-bottom: 12px;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn {
+      flex: 1;
+      min-width: 140px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 18px;
+      font-size: 13.5px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      text-decoration: none;
+    }
+
+    .btn-wa {
+      background: #25d366;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(37,211,102,0.28);
+    }
+
+    .btn-wa:hover {
+      background: #20bd5a;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-light);
+    }
+
+    .btn-outline {
+      background: #ffffff;
+      border: 1.5px solid #d1d5db;
+      color: var(--text-main);
+    }
+
+    .btn-outline:hover {
+      background: #f9fafb;
+      border-color: #9ca3af;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #111827;
+      color: #ffffff;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 9999;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <a href="./" class="back-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Kembali ke Undangan
+    </a>
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-sub">ANDALBA PROJECT • GENERATOR LINK</div>
+      <h1 class="header-title">The Wedding of Ilma &amp; Lana</h1>
+      <p class="header-desc">Buat tautan personal dan teks undangan WhatsApp otomatis sesuai sesi acara tamu.</p>
+    </div>
+
+    <!-- Main Card -->
+    <div class="card">
+      
+      <!-- Input Nama Tamu -->
+      <div class="form-group">
+        <label class="form-label" for="guestName">
+          Nama Tamu Undangan <span class="req">*</span>
+        </label>
+        <input type="text" id="guestName" class="input-text" placeholder="Contoh: Bapak H. Distam &amp; Keluarga" autocomplete="off">
+      </div>
+
+      <!-- Panggilan Tamu -->
+      <div class="form-group">
+        <label class="form-label" for="salutation">
+          Sebutan / Panggilan
+        </label>
+        <select id="salutation" class="input-text">
+          <option value="Bapak/Ibu/Saudara/i" selected>Bapak/Ibu/Saudara/i</option>
+          <option value="Bapak">Bapak</option>
+          <option value="Ibu">Ibu</option>
+          <option value="Saudara/i">Saudara/i</option>
+          <option value="Sahabat">Sahabat</option>
+          <option value="Keluarga Besar">Keluarga Besar</option>
+          <option value="">(Tanpa Panggilan)</option>
+        </select>
+      </div>
+
+      <!-- Pilihan Versi Resepsi -->
+      <div class="form-group">
+        <label class="form-label">
+          Pilih Versi Resepsi (Sesuai Tanggal) <span class="req">*</span>
+        </label>
+        <div class="session-grid">
+          
+          <!-- Versi 1: Sabtu 23 Jan -->
+          <div class="session-card active" data-session="1">
+            <input type="radio" name="session" value="1" checked>
+            <div class="session-badge">Versi 1 (Sabtu)</div>
+            <div class="session-day">Sabtu, 23 Januari 2027</div>
+            <div class="session-time">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Pukul 09.00 WIB – Selesai
+            </div>
+          </div>
+
+          <!-- Versi 2: Minggu 24 Jan -->
+          <div class="session-card" data-session="2">
+            <input type="radio" name="session" value="2">
+            <div class="session-badge">Versi 2 (Minggu)</div>
+            <div class="session-day">Minggu, 24 Januari 2027</div>
+            <div class="session-time">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Sesi 1: Pukul 09.00 – 11.00 WIB
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- No WhatsApp (Opsional) -->
+      <div class="form-group">
+        <label class="form-label" for="guestPhone">
+          Nomor WhatsApp Tamu (Opsional)
+          <span style="font-weight:400;font-size:11px;color:var(--text-muted);">Untuk tombol kirim langsung</span>
+        </label>
+        <input type="tel" id="guestPhone" class="input-text" placeholder="Contoh: 08123456789 atau 628123456789">
+      </div>
+
+      <!-- Output Section -->
+      <div class="output-box">
+        
+        <!-- Link Undangan -->
+        <div class="output-label">
+          <span>Link Undangan Personal</span>
+          <span id="badgeCurrentSession" style="color:var(--gold-dark);font-size:11px;">Versi 1 (Sabtu, 23 Jan)</span>
+        </div>
+        <div class="link-display" id="generatedUrl">https://undangan-pernikahan-ilmalana.vercel.app/</div>
+        
+        <div class="btn-group" style="margin-bottom:16px;">
+          <button type="button" class="btn btn-primary" id="btnCopyLink">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Salin Link
+          </button>
+          <a href="#" target="_blank" class="btn btn-outline" id="btnOpenLink">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"/></svg>
+            Buka Link
+          </a>
+        </div>
+
+        <!-- Teks WhatsApp -->
+        <div class="output-label">
+          <span>Draft Pesan WhatsApp Siap Kirim</span>
+        </div>
+        <textarea id="waMessageText" class="textarea-wa" readonly></textarea>
+
+        <div class="btn-group">
+          <button type="button" class="btn btn-outline" id="btnCopyMsg">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Salin Teks WhatsApp
+          </button>
+          <a href="#" target="_blank" class="btn btn-wa" id="btnSendWa">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.099.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.158.572 4.184 1.572 5.939l-1.572 5.889 6.052-1.587c1.706.945 3.665 1.759 5.948 1.759 6.627 0 12-5.373 12-12s-5.373-12-12-12z"/></svg>
+            Kirim WhatsApp
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Berhasil disalin!</div>
+
+  <script>
+    (function() {
+      "use strict";
+
+      const BASE_URL = "https://undangan-pernikahan-ilmalana.vercel.app/";
+
+      const elGuestName = document.getElementById("guestName");
+      const elSalutation = document.getElementById("salutation");
+      const elGuestPhone = document.getElementById("guestPhone");
+      const elSessionCards = document.querySelectorAll(".session-card");
+      const elGeneratedUrl = document.getElementById("generatedUrl");
+      const elWaMessageText = document.getElementById("waMessageText");
+      const elBtnCopyLink = document.getElementById("btnCopyLink");
+      const elBtnCopyMsg = document.getElementById("btnCopyMsg");
+      const elBtnOpenLink = document.getElementById("btnOpenLink");
+      const elBtnSendWa = document.getElementById("btnSendWa");
+      const elBadgeCurrentSession = document.getElementById("badgeCurrentSession");
+      const elToast = document.getElementById("toast");
+
+      let currentSession = "1";
+
+      // Pilih Versi Acara
+      elSessionCards.forEach(function(card) {
+        card.addEventListener("click", function() {
+          elSessionCards.forEach(function(c) {
+            c.classList.remove("active");
+            c.querySelector("input").checked = false;
+          });
+          card.classList.add("active");
+          card.querySelector("input").checked = true;
+          currentSession = card.getAttribute("data-session");
+          updatePreview();
+        });
+      });
+
+      // Event listener input
+      elGuestName.addEventListener("input", updatePreview);
+      elSalutation.addEventListener("change", updatePreview);
+      elGuestPhone.addEventListener("input", updatePreview);
+
+      function updatePreview() {
+        const rawName = elGuestName.value.trim();
+        const guestName = rawName || "Nama Tamu";
+        const salutation = elSalutation.value;
+        const phone = formatPhone(elGuestPhone.value.trim());
+
+        // 1. Generate Link URL
+        let url = BASE_URL;
+        const params = new URLSearchParams();
+
+        if (rawName) {
+          params.set("to", rawName);
+        }
+
+        if (currentSession === "2") {
+          params.set("sesi", "2");
+        }
+
+        const queryString = params.toString();
+        if (queryString) {
+          url += "?" + queryString;
+        }
+
+        elGeneratedUrl.textContent = url;
+        elBtnOpenLink.href = url;
+
+        // Update badge
+        if (currentSession === "2") {
+          elBadgeCurrentSession.textContent = "Versi 2 (Minggu, 24 Jan - Sesi 1)";
+        } else {
+          elBadgeCurrentSession.textContent = "Versi 1 (Sabtu, 23 Jan)";
+        }
+
+        // 2. Generate WhatsApp Message Template
+        const greetingTarget = salutation ? (salutation + " " + guestName) : guestName;
+
+        let dateLine = "";
+        let timeLine = "";
+
+        if (currentSession === "2") {
+          dateLine = "Hari/Tgl: Minggu, 24 Januari 2027";
+          timeLine = "Waktu: Sesi 1 (Pukul 09.00 - 11.00 WIB)";
+        } else {
+          dateLine = "Hari/Tgl: Sabtu, 23 Januari 2027";
+          timeLine = "Waktu: Pukul 09.00 WIB - Selesai";
+        }
+
+        const message = 
+`Kepada Yth.
+${greetingTarget}
+
+Assalamu'alaikum Warahmatullahi Wabarakatuh
+
+Tanpa mengurangi rasa hormat, perkenankan kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara pernikahan kami:
+
+💍 The Wedding of Ilma & Lana 💍
+Ilma Aulia Sabarita, S.E.
+& H. Muhammad Lana Syifaun Niams, S.E.
+
+💒 DETAIL RESEPSI:
+📅 ${dateLine}
+⏰ ${timeLine}
+📍 Tempat: KBIHU AL-KAUTSAR JOMBANG
+(Dsn. Dempok, Rt.01/Rw.01, Ds. Grogol, Kec. Diwek, Kab. Jombang)
+
+Berikut link undangan digital kami untuk informasi lengkap acara dan konfirmasi kehadiran:
+👉 ${url}
+
+Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir serta memberikan doa restu kepada kami.
+
+Terima kasih atas perhatian dan doa restunya.
+
+Wassalamu'alaikum Warahmatullahi Wabarakatuh
+
+Kami yang berbahagia,
+Ilma & Lana
+Beserta Keluarga Besar`;
+
+        elWaMessageText.value = message;
+
+        // WhatsApp Direct Link
+        const waEncoded = encodeURIComponent(message);
+        if (phone) {
+          elBtnSendWa.href = `https://api.whatsapp.com/send?phone=${phone}&text=${waEncoded}`;
+        } else {
+          elBtnSendWa.href = `https://api.whatsapp.com/send?text=${waEncoded}`;
+        }
+      }
+
+      function formatPhone(phone) {
+        if (!phone) return "";
+        let cleaned = phone.replace(/[^0-9]/g, "");
+        if (cleaned.startsWith("0")) {
+          cleaned = "62" + cleaned.slice(1);
+        }
+        return cleaned;
+      }
+
+      // Copy Link
+      elBtnCopyLink.addEventListener("click", function() {
+        copyToClipboard(elGeneratedUrl.textContent, "Link undangan berhasil disalin!");
+      });
+
+      // Copy WA Message
+      elBtnCopyMsg.addEventListener("click", function() {
+        copyToClipboard(elWaMessageText.value, "Teks WhatsApp berhasil disalin!");
+      });
+
+      function copyToClipboard(text, msg) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function() {
+            showToast(msg);
+          }).catch(function() {
+            fallbackCopy(text, msg);
+          });
+        } else {
+          fallbackCopy(text, msg);
+        }
+      }
+
+      function fallbackCopy(text, msg) {
+        const temp = document.createElement("textarea");
+        temp.value = text;
+        document.body.appendChild(temp);
+        temp.select();
+        try {
+          document.execCommand("copy");
+          showToast(msg);
+        } catch (e) {
+          alert("Gagal menyalin otomatis. Silakan salin manual.");
+        }
+        document.body.removeChild(temp);
+      }
+
+      function showToast(msg) {
+        elToast.textContent = msg;
+        elToast.classList.add("show");
+        setTimeout(function() {
+          elToast.classList.remove("show");
+        }, 2500);
+      }
+
+      // Init first render
+      updatePreview();
+
+    })();
+  </script>
+
+</body>
+</html>
+
