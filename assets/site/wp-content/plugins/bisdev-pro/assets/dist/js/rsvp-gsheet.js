@@ -6,10 +6,10 @@
   "use strict";
 
   // =========================================================================
-  // MASUKKAN URL WEB APP GOOGLE APPS SCRIPT ANDA DI BAWAH INI:
-  // Contoh: const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby.../exec";
+  // URL WEB APP GOOGLE APPS SCRIPT:
   // =========================================================================
   const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbymmCahki0VXTkwDYvlId-T9R9VXUMpfW1hrWnEzv7E3NtbC8ylOvtyFUuThSpDRMU/exec"; 
+  const CACHE_KEY = "andalba_rsvp_cache_ilma_lana";
 
   function initRSVP() {
     const rsvpCard = document.querySelector(".rsvp-card");
@@ -33,9 +33,24 @@
       errorMsg.textContent = "";
     }
 
+    let currentList = [];
     let selectedPresence = "Hadir";
 
-    // Set listener untuk tombol pill Hadir / Tidak Hadir
+    // 1. Tampilkan data dari LocalStorage terlebih dahulu (Instant Load 0ms)
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          currentList = parsed;
+          renderList(currentList);
+        }
+      }
+    } catch (e) {
+      console.warn("RSVP Cache warning:", e);
+    }
+
+    // 2. Set listener untuk tombol pill Hadir / Tidak Hadir
     pills.forEach(function (pill) {
       const type = pill.getAttribute("data-rsvp-pill");
       if (type === "hadir") {
@@ -53,7 +68,7 @@
       });
     });
 
-    // Handle tombol kirim
+    // 3. Handle tombol kirim
     if (sendBtn) {
       sendBtn.addEventListener("click", function (e) {
         e.preventDefault();
@@ -96,18 +111,19 @@
           ucapan: ucapan
         });
 
-        // Jika GOOGLE_SCRIPT_URL belum disetel
-        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.indexOf("http") !== 0) {
-          setTimeout(function () {
-            sendBtn.disabled = false;
-            sendBtn.textContent = originalText;
-            addComment(nama, selectedPresence, ucapan, "Baru saja");
-            showSuccessPopup("Terima kasih, ucapan kamu sudah terkirim!");
-            if (nameInput) nameInput.value = "";
-            if (msgInput) msgInput.value = "";
-          }, 600);
-          return;
-        }
+        // Simpan langsung secara lokal ke UI agar instan terlihat
+        const newEntry = {
+          nama: nama,
+          kehadiran: selectedPresence,
+          ucapan: ucapan,
+          timestamp: "Baru saja"
+        };
+        currentList.unshift(newEntry);
+        renderList(currentList);
+        saveCache(currentList);
+
+        if (nameInput) nameInput.value = "";
+        if (msgInput) msgInput.value = "";
 
         // Kirim request ke Google Apps Script Web App
         fetch(GOOGLE_SCRIPT_URL, {
@@ -121,56 +137,62 @@
           .then(function () {
             sendBtn.disabled = false;
             sendBtn.textContent = originalText;
-            addComment(nama, selectedPresence, ucapan, "Baru saja");
             showSuccessPopup("Terima kasih, konfirmasi kehadiran dan ucapan Anda telah tersimpan!");
-            if (nameInput) nameInput.value = "";
-            if (msgInput) msgInput.value = "";
+            // Sinkronisasi ulang dari spreadsheet setelah 2.5 detik
+            setTimeout(fetchComments, 2500);
           })
           .catch(function (err) {
             console.error("Gagal mengirim RSVP ke Google Sheets:", err);
             sendBtn.disabled = false;
             sendBtn.textContent = originalText;
-            // Tetap berikan feedback positif karena mode no-cors terkadang menganggap redirect sebagai opaque
-            addComment(nama, selectedPresence, ucapan, "Baru saja");
-            showSuccessPopup("Terima kasih, konfirmasi kehadiran kamu sudah terkirim!");
-            if (nameInput) nameInput.value = "";
-            if (msgInput) msgInput.value = "";
+            showSuccessPopup("Terima kasih, ucapan kamu sudah dicatat!");
+            setTimeout(fetchComments, 2500);
           });
       });
     }
 
-    // Fungsi Render Komentar ke Daftar Ucapan
-    function addComment(nama, kehadiran, ucapan, timeStr) {
+    // 4. Render Seluruh Daftar Komentar
+    function renderList(items) {
       if (!rsvpList) return;
-      const initial = (nama.charAt(0) || "U").toUpperCase();
-      const isHadir = kehadiran.toLowerCase() === "hadir";
-      const badgeStyle = isHadir
-        ? "background-color: #d1f7e0; color: #14532d; border: 1px solid rgba(20,83,45,.18);"
-        : "background-color: #ffe4e4; color: #e11d48; border: 1px solid rgba(220,38,38,.2);";
+      if (!Array.isArray(items) || items.length === 0) return;
 
-      const li = document.createElement("li");
-      li.className = "rsvp-item";
-      li.style.animation = "nikuFadeIn .3s ease-out";
-      li.innerHTML = `
-        <div class="rsvp-ava" style="display:flex;">
-          <span class="rsvp-ava-letter">${escapeHtml(initial)}</span>
-        </div>
-        <div class="rsvp-body">
-          <div class="rsvp-name">
-            ${escapeHtml(nama)}
-            <span style="display:inline-block; font-size:10px; font-weight:600; padding:2px 8px; border-radius:6px; margin-left:6px; ${badgeStyle}">
-              ${escapeHtml(kehadiran)}
-            </span>
-          </div>
-          <div class="rsvp-meta">${escapeHtml(timeStr || "Baru saja")}</div>
-          <div class="rsvp-msg">${escapeHtml(ucapan).replace(/\\n/g, "<br>")}</div>
-        </div>
-      `;
+      const html = items.map(function (item) {
+        const initial = (item.nama ? item.nama.charAt(0) : "T").toUpperCase();
+        const isHadir = (item.kehadiran || "").toLowerCase() === "hadir";
+        const badgeStyle = isHadir
+          ? "background-color: #d1f7e0; color: #14532d; border: 1px solid rgba(20,83,45,.18);"
+          : "background-color: #ffe4e4; color: #e11d48; border: 1px solid rgba(220,38,38,.2);";
+        const timeStr = item.timestamp || "Baru saja";
 
-      rsvpList.insertBefore(li, rsvpList.firstChild);
+        return `
+          <li class="rsvp-item" style="animation: nikuFadeIn .3s ease-out;">
+            <div class="rsvp-ava" style="display:flex;">
+              <span class="rsvp-ava-letter">${escapeHtml(initial)}</span>
+            </div>
+            <div class="rsvp-body">
+              <div class="rsvp-name">
+                ${escapeHtml(item.nama)}
+                <span style="display:inline-block; font-size:10px; font-weight:600; padding:2px 8px; border-radius:6px; margin-left:6px; ${badgeStyle}">
+                  ${escapeHtml(item.kehadiran || "Hadir")}
+                </span>
+              </div>
+              <div class="rsvp-meta">${escapeHtml(timeStr)}</div>
+              <div class="rsvp-msg">${escapeHtml(item.ucapan).replace(/\n/g, "<br>")}</div>
+            </div>
+          </li>
+        `;
+      }).join("");
+
+      rsvpList.innerHTML = html;
     }
 
-    // Fungsi Pop-up Notifikasi Sukses
+    function saveCache(data) {
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+      } catch (e) {}
+    }
+
+    // 5. Pop-up Notifikasi Sukses
     function showSuccessPopup(message) {
       const existing = document.querySelector(".niku-rsvp-success-popup");
       if (existing) existing.remove();
@@ -213,22 +235,74 @@
         .replace(/'/g, "&#039;");
     }
 
-    // Ambil daftar ucapan yang tersimpan di Google Sheets jika URL sudah diisi
-    if (GOOGLE_SCRIPT_URL && GOOGLE_SCRIPT_URL.indexOf("http") === 0) {
-      fetch(GOOGLE_SCRIPT_URL)
+    // 6. Mengambil Data Ucapan dari Google Sheets (Fetch + JSONP Fallback)
+    function fetchComments() {
+      if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.indexOf("http") !== 0) return;
+
+      let fetchedSuccessfully = false;
+      const fetchTimer = setTimeout(function () {
+        if (!fetchedSuccessfully) {
+          fetchViaJsonp();
+        }
+      }, 3500);
+
+      fetch(GOOGLE_SCRIPT_URL + "?_ts=" + Date.now(), {
+        method: "GET",
+        headers: {
+          "Accept": "application/json"
+        }
+      })
         .then(function (res) {
           return res.json();
         })
         .then(function (res) {
-          if (res.status === "success" && Array.isArray(res.data)) {
-            // Urutkan dan render
-            res.data.slice().reverse().forEach(function (item) {
-              addComment(item.nama, item.kehadiran, item.ucapan, item.timestamp);
-            });
+          fetchedSuccessfully = true;
+          clearTimeout(fetchTimer);
+          if (res && res.status === "success" && Array.isArray(res.data)) {
+            currentList = res.data;
+            renderList(currentList);
+            saveCache(currentList);
           }
         })
-        .catch(function () {});
+        .catch(function () {
+          if (!fetchedSuccessfully) {
+            clearTimeout(fetchTimer);
+            fetchViaJsonp();
+          }
+        });
     }
+
+    // Fallback JSONP jika browser memblokir fetch lintas domain
+    function fetchViaJsonp() {
+      const callbackName = "andalbaRsvpCb_" + Date.now();
+      const script = document.createElement("script");
+
+      window[callbackName] = function (res) {
+        try {
+          delete window[callbackName];
+          if (script.parentNode) script.parentNode.removeChild(script);
+        } catch (e) {}
+
+        if (res && res.status === "success" && Array.isArray(res.data)) {
+          currentList = res.data;
+          renderList(currentList);
+          saveCache(currentList);
+        }
+      };
+
+      script.src = GOOGLE_SCRIPT_URL + (GOOGLE_SCRIPT_URL.indexOf("?") === -1 ? "?" : "&") + "callback=" + callbackName + "&_t=" + Date.now();
+      script.onerror = function () {
+        try {
+          delete window[callbackName];
+          if (script.parentNode) script.parentNode.removeChild(script);
+        } catch (e) {}
+      };
+
+      document.head.appendChild(script);
+    }
+
+    // Jalankan pengambilan komentar pertama kali
+    fetchComments();
   }
 
   if (document.readyState === "loading") {
@@ -237,4 +311,3 @@
     initRSVP();
   }
 })();
-
